@@ -1,0 +1,5 @@
+# Claude Code local settings — machine/session-specific, not for the repo
+.claude/
+
+# OS
+.DS_Store
