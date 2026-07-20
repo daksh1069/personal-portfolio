@@ -43,7 +43,8 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.05 }}
           className="max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-6xl"
         >
-          {site.name} — <span className="text-primary">{site.role}</span>
+          {site.name}
+          <span className="mt-2 block text-primary">{site.role}</span>
         </motion.h1>
 
         <motion.p

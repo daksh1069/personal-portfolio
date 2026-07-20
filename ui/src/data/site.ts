@@ -1,6 +1,6 @@
 export const site = {
   name: "Daksh Kumar",
-  role: "Quant Finance × AI Engineer",
+  role: "Derivatives, Volatility & Rates",
   tagline:
     "Building volatility models, backtesting engines, and ML systems — from options desks to production recommendation engines.",
   location: "Raleigh, NC",
