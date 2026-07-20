@@ -8,7 +8,7 @@ export function Projects() {
       <SectionHeading
         eyebrow="Selected work"
         title="Quant finance & ML projects"
-        description="Backtesting engines, volatility models, and production ML — chart curves below are simulated reconstructions built to match the stated backtest metrics, not raw output."
+        description="Backtesting engines, volatility models, and derivatives pricing — charts below render each project's actual published result files (equity curves, calibration fits, validation series), exported unmodified from the source repositories."
       />
       <div className="flex flex-col gap-6">
         {projects.map((project, i) => (

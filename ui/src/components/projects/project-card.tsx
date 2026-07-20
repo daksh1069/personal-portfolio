@@ -1,21 +1,27 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, FileText } from "lucide-react";
 import type { Project } from "@/data/projects";
 import { Badge } from "@/components/ui/badge";
 import { Reveal } from "@/components/reveal";
-import { ConvexityChart } from "@/components/charts/convexity-chart";
-import { VarianceChart } from "@/components/charts/variance-chart";
+import { FloorEquityChart } from "@/components/charts/floor-equity-chart";
+import { VrpTrackingChart } from "@/components/charts/vrp-charts";
+import { IrdCurveChart } from "@/components/charts/ird-charts";
 import { VolSmileChart } from "@/components/charts/vol-smile-chart";
 
-const chartComponents = {
-  convexity: ConvexityChart,
-  variance: VarianceChart,
-  "vol-surface": VolSmileChart,
-} as const;
+function CardChart({ chart }: { chart: Project["chart"] }) {
+  switch (chart) {
+    case "floor-engine":
+      return <FloorEquityChart variant="compact" />;
+    case "vrp":
+      return <VrpTrackingChart />;
+    case "ird":
+      return <IrdCurveChart />;
+    case "vol-surface":
+      return <VolSmileChart />;
+  }
+}
 
 export function ProjectCard({ project, index }: { project: Project; index: number }) {
-  const ChartComponent = chartComponents[project.chart];
-
   return (
     <Reveal delay={index * 0.05}>
       <article className="overflow-hidden rounded-2xl border border-border bg-card">
@@ -27,22 +33,26 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
             <h3 className="text-balance text-xl font-semibold tracking-tight">{project.title}</h3>
             <p className="mt-3 text-sm text-muted-foreground">{project.summary}</p>
 
-            <Link
-              href={`/projects/${project.slug}`}
-              className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-            >
-              View interactive breakdown
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-
-            <ul className="mt-5 space-y-2.5">
-              {project.bullets.map((bullet) => (
-                <li key={bullet} className="flex gap-2.5 text-sm text-foreground/85">
-                  <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-primary" />
-                  {bullet}
-                </li>
-              ))}
-            </ul>
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+              <Link
+                href={`/projects/${project.slug}`}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+              >
+                View interactive breakdown
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              {project.report ? (
+                <a
+                  href={project.report}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  Full report (PDF)
+                </a>
+              ) : null}
+            </div>
 
             <div className="mt-5 flex flex-wrap gap-1.5">
               {project.tags.map((tag) => (
@@ -54,7 +64,7 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
           </div>
 
           <div className="flex flex-col justify-between p-6 lg:col-span-3 sm:p-8">
-            <ChartComponent />
+            <CardChart chart={project.chart} />
 
             <dl className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4">
               {project.metrics.map((metric) => (

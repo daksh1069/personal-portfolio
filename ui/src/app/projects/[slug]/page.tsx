@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText } from "lucide-react";
 import { projects } from "@/data/projects";
 import { site } from "@/data/site";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Reveal } from "@/components/reveal";
-import { ConvexityInteractiveChart } from "@/components/charts/convexity-interactive-chart";
-import { VarianceChart } from "@/components/charts/variance-chart";
-import { VarianceCarryChart } from "@/components/charts/variance-carry-chart";
+import { FloorEquityChart } from "@/components/charts/floor-equity-chart";
+import { RiskDial } from "@/components/charts/risk-dial";
+import { VrpTrackingChart, VrpEquityChart, VrpPremiumChart } from "@/components/charts/vrp-charts";
+import { IrdCurveChart, IrdSpreadChart, IrdVolFitChart } from "@/components/charts/ird-charts";
 import { VolSmileChart } from "@/components/charts/vol-smile-chart";
 import { PnlLeakageChart } from "@/components/charts/pnl-leakage-chart";
 import { cn } from "@/lib/utils";
@@ -32,16 +33,63 @@ export async function generateMetadata({
   };
 }
 
+function ChartBlock({ title, children }: { title?: string; children: React.ReactNode }) {
+  return (
+    <div>
+      {title ? <h3 className="mb-4 text-sm font-semibold tracking-tight">{title}</h3> : null}
+      {children}
+    </div>
+  );
+}
+
 function ProjectCharts({ slug }: { slug: string }) {
   switch (slug) {
     case "convexity-protection":
-      return <ConvexityInteractiveChart />;
+      return (
+        <div className="flex flex-col gap-10">
+          <ChartBlock title="Engine equity vs. the naked-short benchmark (2022–2026, daily)">
+            <FloorEquityChart variant="full" />
+          </ChartBlock>
+          <div className="border-t border-border pt-8">
+            <ChartBlock title="The risk dial: guaranteed bound 2x/(1+x) vs. what the backtest realized">
+              <RiskDial />
+            </ChartBlock>
+          </div>
+        </div>
+      );
     case "variance-risk-premium":
       return (
-        <div className="flex flex-col gap-8">
-          <VarianceChart />
+        <div className="flex flex-col gap-10">
+          <ChartBlock title="Replicated 30-day implied vol vs. the live CBOE VIX (1,676 days)">
+            <VrpTrackingChart />
+          </ChartBlock>
           <div className="border-t border-border pt-8">
-            <VarianceCarryChart />
+            <ChartBlock title="The variance risk premium (implied − subsequently realized)">
+              <VrpPremiumChart />
+            </ChartBlock>
+          </div>
+          <div className="border-t border-border pt-8">
+            <ChartBlock title="Cost-aware short-variance carry, compounded NAV">
+              <VrpEquityChart />
+            </ChartBlock>
+          </div>
+        </div>
+      );
+    case "ird-pricing-engine":
+      return (
+        <div className="flex flex-col gap-10">
+          <ChartBlock title="Bootstrapped zero curve, forwards, and NSS fit">
+            <IrdCurveChart />
+          </ChartBlock>
+          <div className="border-t border-border pt-8">
+            <ChartBlock title="Hull-White calibration: market vs. model ATM swaption vols">
+              <IrdVolFitChart />
+            </ChartBlock>
+          </div>
+          <div className="border-t border-border pt-8">
+            <ChartBlock title="2s10s slope across the dataset (the 2022–2024 inversion)">
+              <IrdSpreadChart />
+            </ChartBlock>
           </div>
         </div>
       );
@@ -90,21 +138,39 @@ export default async function ProjectDetailPage({
           {project.title}
         </h1>
         <p className="mt-4 max-w-3xl text-balance text-muted-foreground">{project.summary}</p>
-        <div className="mt-5 flex flex-wrap gap-1.5">
-          {project.tags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="font-normal">
-              {tag}
-            </Badge>
-          ))}
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          {project.report ? (
+            <a
+              href={project.report}
+              target="_blank"
+              rel="noreferrer"
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5")}
+            >
+              <FileText className="h-3.5 w-3.5" />
+              Read the full report (PDF)
+            </a>
+          ) : null}
+          <div className="flex flex-wrap gap-1.5">
+            {project.tags.map((tag) => (
+              <Badge key={tag} variant="secondary" className="font-normal">
+                {tag}
+              </Badge>
+            ))}
+          </div>
         </div>
       </Reveal>
 
       <Reveal delay={0.05} className="mt-10 rounded-2xl border border-border bg-card p-6 sm:p-8">
         <ProjectCharts slug={project.slug} />
+        <p className="mt-6 border-t border-border pt-4 text-xs text-muted-foreground">
+          {project.realData
+            ? "Charts render the project's actual published result files, exported unmodified from the source repository."
+            : "Charts are illustrative reconstructions matching the reported metrics; the underlying course project is not public."}
+        </p>
       </Reveal>
 
       <Reveal delay={0.1} className="mt-10">
-        <h2 className="text-lg font-semibold tracking-tight">Approach</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Approach & findings</h2>
         <ul className="mt-4 space-y-3">
           {project.bullets.map((bullet) => (
             <li key={bullet} className="flex gap-3 text-sm text-foreground/85">

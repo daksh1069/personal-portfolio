@@ -8,10 +8,10 @@ import { GithubIcon, LinkedinIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 const stats = [
-  { label: "Sharpe (hedged carry)", value: "1.84" },
-  { label: "Vol-surface RMSE", value: "2.47%" },
-  { label: "Max DD cut", value: "−79.6% → −23.5%" },
-  { label: "VIX tracking corr.", value: "0.99" },
+  { label: "Guaranteed MaxDD bound (LETF hedge)", value: "15.0%" },
+  { label: "Net Sharpe (short-variance carry)", value: "1.84" },
+  { label: "VIX replication corr.", value: "0.9909" },
+  { label: "Delta-hedge variance reduction", value: "26.1×" },
 ];
 
 export function Hero() {

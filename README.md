@@ -5,7 +5,7 @@ Personal portfolio site: quant finance / ML projects, experience, and background
 ## Layout
 
 - **`ui/`** — Next.js 16 frontend (TypeScript, Tailwind v4, shadcn/ui, Framer Motion, Recharts). This is what deploys to Vercel. See [`ui/README.md`](ui/README.md).
-- **`be/`** — Python venv. Precomputes the scenario-grid JSON that powers the interactive charts (e.g. the OTM% hedge slider on the Convexity Protection project page) and writes it straight into `ui/src/data/generated/`. Nothing here runs at request time — it's an offline data-generation step, so hosting stays free and pages stay static. See [`be/README.md`](be/README.md).
+- **`be/`** — Python venv. Exports **real published results** from the source project repositories (the TSLA/TSLL guaranteed-floor engine, the SPX variance-swap replication, the IRD pricing engine) into `ui/src/data/generated/*.json`. Nothing here runs at request time — it's an offline export step, so hosting stays free and pages stay static. See [`be/README.md`](be/README.md) for the source-repo table and integrity rules.
 
 ## Quick start
 
@@ -13,16 +13,18 @@ Personal portfolio site: quant finance / ML projects, experience, and background
 # Frontend (what you want 95% of the time)
 cd ui && npm install && npm run dev        # http://localhost:3000
 
-# Regenerate simulated backtest data (only needed if you change be/scripts/*)
-cd be && source .venv/bin/activate && python scripts/generate_convexity_grid.py
+# Re-export real project results (needs the source repos on this machine)
+cd be && source .venv/bin/activate && python scripts/export_site_data.py
 ```
 
 ## Data flow
 
-Everything currently renders from data in `ui/src/data/` (resume content) and
-`ui/src/data/generated/` (JSON produced by `be/`) — no live backend, no
-database, no API calls at runtime. That's intentional: it's the fastest and
-cheapest way to host a portfolio (pure static + CDN caching on Vercel).
+Everything renders from data in `ui/src/data/` (resume content) and
+`ui/src/data/generated/` (real result files exported by `be/`) — no live
+backend, no database, no API calls at runtime. That's intentional: it's the
+fastest and cheapest way to host a portfolio (pure static + CDN caching on
+Vercel). The dynamic-hedging project's full LaTeX report is served at
+`/reports/tsla-tsll-hedging-report.pdf`.
 
 If a project later needs *live* interactivity beyond a precomputed grid
 (arbitrary parameter recompute, not just picking a point on a slider), the

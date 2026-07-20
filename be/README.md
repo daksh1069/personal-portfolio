@@ -1,9 +1,9 @@
 # Backend (`be/`)
 
-A Python venv, not a running server. Its only job right now is to
-precompute the JSON that drives the interactive charts in `ui/`, so the
-site can stay 100% static (free + fast) while still having "real" data
-behind the sliders.
+A Python venv, not a running server. Its job is to export **real results**
+from the source project repositories into the JSON files the frontend
+charts import, so the site stays 100% static (free + fast) while every
+chart renders actual published backtest/analysis output.
 
 ## Setup
 
@@ -17,37 +17,39 @@ pip install -r requirements.txt
 
 ```bash
 source .venv/bin/activate
-python scripts/generate_convexity_grid.py
+python scripts/export_site_data.py
 ```
 
-Writes the same JSON to two places:
-- `be/data/convexity_grid.json` — kept here for reference/inspection
-- `ui/src/data/generated/convexity-grid.json` — what the frontend actually imports
+Writes each dataset to two places:
+- `be/data/generated/*.json` — kept here for reference/inspection
+- `ui/src/data/generated/*.json` — what the frontend imports at build time
 
-Re-run this (and commit the regenerated JSON) any time you change the
-generator script. The frontend just imports the JSON at build time — it
-never calls into Python at runtime.
+## Source repositories (machine-local paths, see `PROJECTS` in the script)
 
-## What's here vs. what's real
+| JSON | Source repo | What's exported |
+|---|---|---|
+| `floor-engine.json` | `dynamic_hedging_project` (FIM 675) | The guaranteed-floor engine's published equity curves (`results/floor_engine/equity_*.csv`), the naked-short benchmark series (`results/double_short/equity.csv`), risk-dial table, lineage, summary, and verification tables |
+| `vrp.json` | `variance_risk_premium_variance_swap_replication` | Synthetic-vs-VIX validation series, VRP series, and the carry strategy's daily P&L compounded into NAV (matches RESULTS.md: +221% net, −70.6% MaxDD) |
+| `ird.json` | `swaption_project` | Bootstrapped zero/forward/NSS curve, 2s10s history (2,206 FRED dates), Hull-White market-vs-model calibration grid |
 
-`scripts/generate_convexity_grid.py` is a **placeholder parametric model**,
-not the real TSLL backtest engine — it's tuned so the 10%-OTM scenario
-reproduces the actual reported numbers (max drawdown −23.5%, Sharpe 0.69,
-Calmar 0.78) and interpolates a plausible curve around it for the other
-grid points. Swap the body of that script for a call into the real
-backtester whenever it's available; the JSON shape is the contract with
-the frontend and can stay the same.
+**Integrity rule:** everything charted on the site is copied unmodified from
+those repos' published result files. The only derived series are (a) VRP NAV
+compounding, which replicates the source repo's own stated methodology and
+is checked against its published totals at export time (the script prints
+the reconciliation), and (b) unit/indexing conversions (×100 for percent).
+The exporter fails loudly if a source repo is missing.
 
-## If a project later needs live recompute (not just this precomputed grid)
+Re-run the exporter (and commit the regenerated JSON) whenever a source
+project regenerates its results. The frontend never calls Python at runtime.
 
-Two free-tier options, not yet built:
+The full dynamic-hedging write-up PDF is copied (manually) from
+`dynamic_hedging_project/latex/tsla_tsll_hedging_report.pdf` to
+`ui/public/reports/tsla-tsll-hedging-report.pdf`.
 
-- **Vercel Python serverless function** — supported on the free Hobby tier
-  (stateless, ~10s execution limit, cold starts). Fine for a lightweight
-  numpy/pandas recompute per request.
-- **Upstash Redis** (free tier, 10K commands/day, integrates natively with
-  Vercel) — cache expensive results keyed by request params so repeat
-  requests are instant.
+## If a project later needs live recompute
 
-Only worth doing once a project needs truly arbitrary/continuous
-parameters rather than picking a point on a fixed grid.
+Two free-tier options, not yet built: a Vercel Python serverless function
+(Hobby tier: stateless, ~10s limit) for lightweight recompute, plus Upstash
+Redis (free tier) to cache results keyed by request params. Only worth doing
+once a page needs truly arbitrary parameters rather than selecting among
+precomputed configurations.
