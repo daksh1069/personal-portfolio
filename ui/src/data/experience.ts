@@ -1,5 +1,6 @@
 export type Experience = {
   company: string;
+  companyUrl?: string;
   role: string;
   location: string;
   period: string;
@@ -9,6 +10,7 @@ export type Experience = {
 export const experience: Experience[] = [
   {
     company: "CBCatalyst",
+    companyUrl: "https://cbcatalyst.com/",
     role: "Founding AI Engineer",
     location: "Delhi, India",
     period: "Mar 2025 – Jan 2026",
@@ -20,6 +22,7 @@ export const experience: Experience[] = [
   },
   {
     company: "PropReturns (YC S21)",
+    companyUrl: "https://www.ycombinator.com/companies/propreturns",
     role: "Founding Data Science Engineer",
     location: "Mumbai, India",
     period: "Jan 2023 – Mar 2024",

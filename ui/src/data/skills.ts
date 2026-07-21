@@ -13,7 +13,8 @@ export const skills: SkillGroup[] = [
     items: [
       "Options & Derivative Pricing",
       "Stochastic Calculus",
-      "Local/Stochastic Vol (Dupire, Heston, SLV)",
+      "Local Vol (Dupire)",
+      "Stochastic Vol (Heston, SLV)",
       "Variance Swaps",
       "Backtesting",
       "Bloomberg Terminal & API",

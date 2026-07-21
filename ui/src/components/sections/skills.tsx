@@ -10,8 +10,8 @@ export function Skills() {
         <SectionHeading eyebrow="Toolbox" title="Skills" />
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {skills.map((group, i) => (
-            <Reveal key={group.label} delay={i * 0.05}>
-              <div className="rounded-xl border border-border bg-card p-5">
+            <Reveal key={group.label} delay={i * 0.05} className="min-w-0">
+              <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-card p-5">
                 <h3 className="font-mono text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   {group.label}
                 </h3>
