@@ -118,7 +118,7 @@ export const projects: Project[] = [
     ],
     tags: ["SVI", "Dupire", "Heston", "No-Arbitrage", "SPX Options", "SciPy"],
     chart: "vol-surface",
-    repoUrl: "https://github.com/atat0303/Volatility-Surface-Calibration",
+    repoUrl: "https://github.com/daksh1069/volatility-surface-calibration",
     realData: true,
   },
 ];
