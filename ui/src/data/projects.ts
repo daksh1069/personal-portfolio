@@ -12,6 +12,8 @@ export type Project = {
   chart: "floor-engine" | "vrp" | "ird" | "vol-surface";
   /** Path under /public to a full write-up PDF, if one exists. */
   report?: string;
+  /** GitHub repository for this project. */
+  repoUrl?: string;
   /** True when the project's charts render real backtest/analysis output. */
   realData: boolean;
 };
@@ -41,6 +43,7 @@ export const projects: Project[] = [
     tags: ["Python", "Options", "LETF", "Collar", "No-Arbitrage Bounds", "Bloomberg", "Backtesting"],
     chart: "floor-engine",
     report: "/reports/tsla-tsll-hedging-report.pdf",
+    repoUrl: "https://github.com/daksh1069/dynamic_hedging_letf",
     realData: true,
   },
   {
@@ -65,6 +68,7 @@ export const projects: Project[] = [
     ],
     tags: ["Options", "Variance Swaps", "VIX", "Databento", "Streamlit", "Risk Premia"],
     chart: "vrp",
+    repoUrl: "https://github.com/daksh1069/variance-risk-premium",
     realData: true,
   },
   {
@@ -89,29 +93,32 @@ export const projects: Project[] = [
     ],
     tags: ["NumPy", "Hull-White", "Monte Carlo", "Longstaff-Schwartz", "Yield Curves", "FRED"],
     chart: "ird",
+    repoUrl: "https://github.com/daksh1069/interest-rate-derivatives-engine",
     realData: true,
   },
   {
     slug: "vol-model-calibration",
-    title: "Calibration and Hedging of Local, Stochastic, and Hybrid Volatility Models",
-    org: "North Carolina State University",
+    title: "Volatility Surface Calibration — SVI, Local Vol & Heston (SPX)",
+    org: "North Carolina State University (group project)",
     period: "Jan 2026 – May 2026",
     summary:
-      "A unified calibration and hedging framework for Local (Dupire), Stochastic (Heston), and Stochastic-Local Volatility (SLV) models across 5,000+ SPX option contracts.",
+      "An SPX volatility-surface pipeline: options cleaning, Black-Scholes implied vols via a hand-rolled Secant solver, put-call-parity forwards, an SVI surface calibrated with no-arbitrage penalties, Dupire local vol extracted from it, and a Heston model calibrated to the same surface for a like-for-like comparison.",
     bullets: [
-      "Developed a unified calibration and hedging framework in Python for Local (Dupire), Stochastic (Heston), and Stochastic-Local Volatility (SLV) models using 5,000+ SPX option contracts.",
-      "Constructed an arbitrage-free volatility surface via SVI parameterization, achieving an overall RMSE of 2.47% and a 94% convergence rate for Black-Scholes inversion using the Secant Method.",
-      "Implemented a finite-difference PDE solver for the Dupire model and calibrated Heston parameters to capture dynamic smile effects, reducing pricing errors by ~15% in deep out-of-the-money strikes.",
-      "Benchmarked Delta-hedging performance against a Black-Scholes baseline, demonstrating a 12% reduction in P&L leakage across a 1-year backtest, and stress-tested model robustness against the 2020 COVID-19 regime, maintaining surface stability with a maximum RMSE of 3.8% during peak VIX periods.",
+      "Cleaned and filtered SPX end-of-day option chains, then computed Black-Scholes implied vols with a Secant-method root finder: 94.1% call / 94.4% put convergence across 5,024 options; per-expiry forwards and discount factors estimated from put-call parity.",
+      "Calibrated a full SVI surface (SSVI seed, then per-slice refinement in total-variance space with Durrleman butterfly and calendar-spread penalties): overall RMSE of 2.38 vol points across 4,655 options and 46 expiries — 1.09 at the money — with 44/46 slices butterfly-arbitrage-free and worst calendar crossedness of 0.0028 in total variance.",
+      "Extracted Dupire local volatility from the calibrated surface via Gatheral's local-variance formula (analytic SVI x-derivatives, finite differences in T): valid on 93.5% of a 37-expiry × 71-strike grid, with failures concentrated where the small calendar crossings make ∂w/∂T negative.",
+      "Calibrated Heston by differential evolution on characteristic-function pricing (little-Heston-trap formulation, Gauss-Legendre integration): IV RMSE of 0.78 vol points vs SVI's 1.29 on the identical subsample (T ≥ 30d, |x| ≤ 0.25), with ρ = −0.99 capturing the SPX skew and the Feller condition satisfied.",
+      "Every number above is computed by scripts in the repo from its committed result files; the interactive surface below renders the actual calibrated parameters.",
     ],
     metrics: [
-      { label: "Surface RMSE", value: "2.47%" },
-      { label: "BS Inversion Convergence", value: "94%" },
-      { label: "Deep-OTM Error Reduction", value: "~15%" },
-      { label: "P&L Leakage Reduction", value: "12%" },
+      { label: "SVI surface RMSE", value: "2.38 vol pts" },
+      { label: "Secant IV convergence", value: "94%" },
+      { label: "Heston IV RMSE (T≥30d)", value: "0.78 vol pts" },
+      { label: "Butterfly-arb-free slices", value: "44/46" },
     ],
-    tags: ["Dupire", "Heston", "SVI", "PDE", "Delta Hedging"],
+    tags: ["SVI", "Dupire", "Heston", "No-Arbitrage", "SPX Options", "SciPy"],
     chart: "vol-surface",
-    realData: false,
+    repoUrl: "https://github.com/atat0303/Volatility-Surface-Calibration",
+    realData: true,
   },
 ];

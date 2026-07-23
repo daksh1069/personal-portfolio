@@ -6,7 +6,8 @@ import { Reveal } from "@/components/reveal";
 import { FloorEquityChart } from "@/components/charts/floor-equity-chart";
 import { VrpTrackingChart } from "@/components/charts/vrp-charts";
 import { IrdCurveChart } from "@/components/charts/ird-charts";
-import { VolSmileChart } from "@/components/charts/vol-smile-chart";
+import { VolSurface3D } from "@/components/charts/vol-surface-charts";
+import { GithubIcon } from "@/components/icons";
 
 function CardChart({ chart }: { chart: Project["chart"] }) {
   switch (chart) {
@@ -17,7 +18,7 @@ function CardChart({ chart }: { chart: Project["chart"] }) {
     case "ird":
       return <IrdCurveChart />;
     case "vol-surface":
-      return <VolSmileChart />;
+      return <VolSurface3D compact />;
   }
 }
 
@@ -41,6 +42,17 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
                 View interactive breakdown
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
+              {project.repoUrl ? (
+                <a
+                  href={project.repoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                >
+                  <GithubIcon className="h-3.5 w-3.5" />
+                  GitHub
+                </a>
+              ) : null}
               {project.report ? (
                 <a
                   href={project.report}

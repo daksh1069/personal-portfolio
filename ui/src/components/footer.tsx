@@ -1,14 +1,18 @@
 import { GraduationCap, Mail } from "lucide-react";
 import { site } from "@/data/site";
 import { GithubIcon, LinkedinIcon } from "@/components/icons";
+import { VisitorCount } from "@/components/visitor-count";
 
 export function Footer() {
   return (
     <footer className="border-t border-border/60">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-10 text-sm text-muted-foreground sm:flex-row sm:justify-between sm:px-6">
-        <p>
-          © {new Date().getFullYear()} {site.name}. Built with Next.js & Tailwind.
-        </p>
+        <div className="flex items-center gap-4">
+          <p>
+            © {new Date().getFullYear()} {site.name}. Built with Next.js & Tailwind.
+          </p>
+          <VisitorCount />
+        </div>
         <div className="flex items-center gap-4">
           <a
             href={`mailto:${site.email}`}

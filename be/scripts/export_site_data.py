@@ -29,6 +29,7 @@ PROJECTS = {
     "dynamic_hedging": Path("/Users/dakshkumar/NCSU/Summer Session 1 2026/FIM 675/dynamic_hedging_project"),
     "vrp": Path("/Users/dakshkumar/NCSU/Quant Projects self/variance_risk_premium_variance_swap_replication"),
     "swaption": Path("/Users/dakshkumar/NCSU/Quant Projects self/swaption_project"),
+    "vol_surface": Path("/Users/dakshkumar/NCSU/Quant Projects self/volatility-surface-calibration"),
 }
 
 
@@ -226,6 +227,79 @@ def export_ird() -> None:
     write_json("ird.json", payload)
 
 
+# --------------------------------------------------------------------------
+# 4. Volatility surface calibration (volatility-surface-calibration)
+# --------------------------------------------------------------------------
+def _svi_iv(x, T, p):
+    w = p["a"] + p["b"] * (p["rho"] * (x - p["m"]) + np.sqrt((x - p["m"]) ** 2 + p["sigma"] ** 2))
+    return np.sqrt(np.maximum(w, 1e-10) / T)
+
+
+def export_vol_surface() -> None:
+    svi = PROJECTS["vol_surface"] / "data" / "svi_calibration"
+
+    params = pd.read_csv(svi / "svi_parameters.csv").sort_values("T").reset_index(drop=True)
+    surf = pd.read_csv(svi / "svi_fitted_surface.csv")
+    dupire = pd.read_csv(svi / "dupire_local_vol.csv")
+    heston_fit = pd.read_csv(svi / "heston_fit.csv")
+    metrics = json.loads((svi / "surface_metrics.json").read_text())
+    heston = json.loads((svi / "heston_params.json").read_text())
+    dupire_rep = json.loads((svi / "dupire_report.json").read_text())
+
+    # 3D SVI implied-vol surface: evaluate params on a regular (T, x) grid.
+    keep = params[params["T"] >= 14 / 365].reset_index(drop=True)
+    slice_idx = np.unique(np.linspace(0, len(keep) - 1, 14).astype(int))
+    x_grid = np.round(np.arange(-0.30, 0.301, 0.02), 2)
+    surface_rows = []
+    for i in slice_idx:
+        p = keep.iloc[i]
+        iv = _svi_iv(x_grid, p["T"], p)
+        surface_rows.append({"T": r(p["T"]), "iv": r(iv * 100, 2)})
+
+    # Matching Dupire local-vol surface on its own grid, thinned the same way.
+    lv_rows = []
+    dup_ts = np.array(sorted(dupire["T"].unique()))
+    for t in dup_ts[np.unique(np.linspace(0, len(dup_ts) - 1, 14).astype(int))]:
+        g = dupire[(dupire["T"] == t) & (dupire["x"].abs() <= 0.301)].sort_values("x")
+        lv = pd.to_numeric(g["local_vol"], errors="coerce") * 100
+        lv_rows.append({"T": r(float(t)), "lv": [r(v, 2) if np.isfinite(v) else None for v in lv]})
+
+    # Smile fits: market dots + SVI line (+ Heston line where in subsample).
+    smile_targets = [30 / 365, 91 / 365, 182 / 365, 365 / 365]
+    smiles = []
+    for target in smile_targets:
+        T_near = float(params.iloc[(params["T"] - target).abs().argmin()]["T"])
+        p = params[params["T"] == T_near].iloc[0]
+        mkt = surf[surf["T"] == T_near].sort_values("x")
+        mkt = mkt[mkt["x"].abs() <= 0.30]
+        line_iv = _svi_iv(x_grid, T_near, p)
+        hes = heston_fit[heston_fit["T"] == T_near].sort_values("x")
+        smiles.append(
+            {
+                "T": r(T_near),
+                "label": f"{round(T_near * 365)}d",
+                "market": {"x": r(mkt["x"], 3), "iv": r(mkt["iv"] * 100, 2)},
+                "svi": {"x": r(x_grid, 2), "iv": r(line_iv * 100, 2)},
+                "heston": {"x": r(hes["x"], 3), "iv": r(hes["iv_heston"] * 100, 2)},
+            }
+        )
+
+    payload = {
+        "surface": {"x": r(x_grid, 2), "slices": surface_rows},
+        "localVolSurface": {"x": r(x_grid, 2), "slices": lv_rows},
+        "smiles": smiles,
+        "termStructure": {
+            "T": r(params["T"], 4),
+            "atmVol": r(params["atm_vol"] * 100, 2),
+        },
+        "metrics": metrics,
+        "heston": heston,
+        "dupire": dupire_rep,
+    }
+    write_json("vol-surface.json", payload)
+    print(f"  vol surface: RMSE {metrics['rmse_vol_pts']} pts, heston {heston['heston_iv_rmse_vol_pts']} pts")
+
+
 if __name__ == "__main__":
     for name, path in PROJECTS.items():
         if not path.exists():
@@ -233,3 +307,4 @@ if __name__ == "__main__":
     export_floor_engine()
     export_vrp()
     export_ird()
+    export_vol_surface()

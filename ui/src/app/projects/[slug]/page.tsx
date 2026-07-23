@@ -11,8 +11,8 @@ import { FloorEquityChart } from "@/components/charts/floor-equity-chart";
 import { RiskDial } from "@/components/charts/risk-dial";
 import { VrpTrackingChart, VrpEquityChart, VrpPremiumChart } from "@/components/charts/vrp-charts";
 import { IrdCurveChart, IrdSpreadChart, IrdVolFitChart } from "@/components/charts/ird-charts";
-import { VolSmileChart } from "@/components/charts/vol-smile-chart";
-import { PnlLeakageChart } from "@/components/charts/pnl-leakage-chart";
+import { VolSurface3D, SmileFitChart, AtmTermChart } from "@/components/charts/vol-surface-charts";
+import { GithubIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 export function generateStaticParams() {
@@ -95,10 +95,19 @@ function ProjectCharts({ slug }: { slug: string }) {
       );
     case "vol-model-calibration":
       return (
-        <div className="flex flex-col gap-8">
-          <VolSmileChart />
+        <div className="flex flex-col gap-10">
+          <ChartBlock title="The calibrated surface — SVI implied vol & Dupire local vol">
+            <VolSurface3D />
+          </ChartBlock>
           <div className="border-t border-border pt-8">
-            <PnlLeakageChart />
+            <ChartBlock title="Smile fits: market vs. SVI vs. Heston">
+              <SmileFitChart />
+            </ChartBlock>
+          </div>
+          <div className="border-t border-border pt-8">
+            <ChartBlock title="ATM implied-vol term structure">
+              <AtmTermChart />
+            </ChartBlock>
           </div>
         </div>
       );
@@ -139,6 +148,17 @@ export default async function ProjectDetailPage({
         </h1>
         <p className="mt-4 max-w-3xl text-balance text-muted-foreground">{project.summary}</p>
         <div className="mt-5 flex flex-wrap items-center gap-3">
+          {project.repoUrl ? (
+            <a
+              href={project.repoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5")}
+            >
+              <GithubIcon className="h-3.5 w-3.5" />
+              View code on GitHub
+            </a>
+          ) : null}
           {project.report ? (
             <a
               href={project.report}
