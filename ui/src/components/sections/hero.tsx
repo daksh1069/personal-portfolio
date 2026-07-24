@@ -62,7 +62,7 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.18 }}
           className="mt-8 flex flex-wrap items-center gap-3"
         >
-          <a href="#projects" className={cn(buttonVariants({ size: "lg" }), "gap-2")}>
+          <a href="/#projects" className={cn(buttonVariants({ size: "lg" }), "gap-2")}>
             View Projects
             <ArrowRight className="h-4 w-4" />
           </a>

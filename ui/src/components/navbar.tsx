@@ -11,11 +11,11 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "#projects", label: "Projects" },
-  { href: "#experience", label: "Experience" },
-  { href: "#skills", label: "Skills" },
-  { href: "#education", label: "Education" },
-  { href: "#contact", label: "Contact" },
+  { href: "/#projects", label: "Projects" },
+  { href: "/#experience", label: "Experience" },
+  { href: "/#skills", label: "Skills" },
+  { href: "/#education", label: "Education" },
+  { href: "/#contact", label: "Contact" },
 ];
 
 export function Navbar() {
@@ -24,7 +24,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="#top" className="font-mono text-sm font-semibold tracking-tight">
+        <Link href="/" className="font-mono text-sm font-semibold tracking-tight">
           {site.name}
           <span className="text-primary">.</span>
         </Link>
