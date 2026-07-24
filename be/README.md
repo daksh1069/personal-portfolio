@@ -32,6 +32,7 @@ Writes each dataset to two places:
 | `vrp.json` | `variance_risk_premium_variance_swap_replication` | Synthetic-vs-VIX validation series, VRP series, and the carry strategy's daily P&L compounded into NAV (matches RESULTS.md: +221% net, −70.6% MaxDD) |
 | `ird.json` | `swaption_project` | Bootstrapped zero/forward/NSS curve, 2s10s history (2,206 FRED dates), Hull-White market-vs-model calibration grid |
 | `vol-surface.json` | `volatility-surface-calibration` (branch `heston-dupire-extensions`) | SVI surface evaluated from its calibrated parameters (3D grid + smiles + ATM term structure), Dupire local-vol grid, Heston fit, and the fit/no-arbitrage metrics computed by `src/surface_metrics.py` |
+| `lob.json` | `lob_and_data_parser` | Session metadata, benchmark latency histogram, thinned mid/spread path, and per-minute message rates from `docs/dashboard_data.json`; the full replay dashboard is copied verbatim to `ui/public/replay/lob-replay.html` |
 
 **Integrity rule:** everything charted on the site is copied unmodified from
 those repos' published result files. The only derived series are (a) VRP NAV

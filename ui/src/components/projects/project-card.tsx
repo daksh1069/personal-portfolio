@@ -7,6 +7,7 @@ import { FloorEquityChart } from "@/components/charts/floor-equity-chart";
 import { VrpTrackingChart } from "@/components/charts/vrp-charts";
 import { IrdCurveChart } from "@/components/charts/ird-charts";
 import { VolSurface3D } from "@/components/charts/vol-surface-charts";
+import { LobMidChart } from "@/components/charts/lob-charts";
 import { GithubIcon } from "@/components/icons";
 
 function CardChart({ chart }: { chart: Project["chart"] }) {
@@ -19,6 +20,8 @@ function CardChart({ chart }: { chart: Project["chart"] }) {
       return <IrdCurveChart />;
     case "vol-surface":
       return <VolSurface3D compact />;
+    case "lob":
+      return <LobMidChart compact />;
   }
 }
 
@@ -42,6 +45,20 @@ export function ProjectCard({ project, index }: { project: Project; index: numbe
                 View interactive breakdown
                 <ArrowRight className="h-3.5 w-3.5" />
               </Link>
+              {project.demo ? (
+                <a
+                  href={project.demo}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                  </span>
+                  Live replay
+                </a>
+              ) : null}
               {project.repoUrl ? (
                 <a
                   href={project.repoUrl}

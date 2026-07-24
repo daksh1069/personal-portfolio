@@ -30,6 +30,7 @@ PROJECTS = {
     "vrp": Path("/Users/dakshkumar/NCSU/Quant Projects self/variance_risk_premium_variance_swap_replication"),
     "swaption": Path("/Users/dakshkumar/NCSU/Quant Projects self/swaption_project"),
     "vol_surface": Path("/Users/dakshkumar/NCSU/Quant Projects self/volatility-surface-calibration"),
+    "lob": Path("/Users/dakshkumar/NCSU/Quant Projects self/lob_and_data_parser"),
 }
 
 
@@ -300,6 +301,68 @@ def export_vol_surface() -> None:
     print(f"  vol surface: RMSE {metrics['rmse_vol_pts']} pts, heston {heston['heston_iv_rmse_vol_pts']} pts")
 
 
+# --------------------------------------------------------------------------
+# 5. LOB engine (lob_and_data_parser)
+# --------------------------------------------------------------------------
+def export_lob() -> None:
+    src = PROJECTS["lob"] / "docs" / "dashboard_data.json"
+    d = json.loads(src.read_text())
+
+    meta, lat, bbo = d["meta"], d["latency"], d["bbo"]
+
+    # Reconstruct the best-bid/ask path from the delta encoding, thin to ~500
+    # points for the card chart (regular trading hours only).
+    t = np.cumsum([bbo["t0"]] + bbo["dt"][: bbo["n"] - 1])
+    b = np.cumsum([bbo["b0"]] + bbo["db"][: bbo["n"] - 1])
+    a = np.cumsum([bbo["a0"]] + bbo["da"][: bbo["n"] - 1])
+    mid = (b + a) / 2 / 100.0
+    spread = (a - b) / 100.0
+    step = max(1, len(t) // 500)
+    idx = np.arange(0, len(t), step)
+
+    def hhmm(ms):
+        s = int(ms // 1000)
+        return f"{s // 3600:02d}:{(s % 3600) // 60:02d}"
+
+    edges = lat["bin_edges"]
+    hist = [
+        {"bin": f"{edges[i]}–{edges[i + 1]}" if i + 1 < len(edges) else f">{edges[i]}",
+         "count": int(c)}
+        for i, c in enumerate(lat["bins"])
+        if c > 0
+    ]
+
+    per_min = [
+        {"t": f"{m // 60:02d}:{m % 60:02d}", "msgs": int(msgs), "fills": int(fills)}
+        for m, msgs, fills, _vol in d["per_minute"]
+        if meta["rth"][0] / 60 <= m <= meta["rth"][1] / 60
+    ]
+
+    payload = {
+        "meta": {
+            "symbol": meta["symbol"],
+            "date": meta["date"],
+            "venue": meta["venue"],
+            "events": meta["events"],
+            "fills": meta["fills"],
+            "tradedVolume": meta["traded_volume"],
+            "eventsPerSec": meta["events_per_sec"],
+            "replaySecs": meta["replay_secs"],
+            "meanSpreadCents": meta["mean_spread_cents"],
+        },
+        "latency": {"p50": lat["p50"], "p90": lat["p90"], "p99": lat["p99"], "p999": lat["p999"]},
+        "latencyHist": hist,
+        "mid": {
+            "t": [hhmm(x) for x in t[idx]],
+            "mid": r(mid[idx], 2),
+            "spread": r(spread[idx], 2),
+        },
+        "perMinute": per_min,
+    }
+    write_json("lob.json", payload)
+    print(f"  lob: {meta['events']:,} events, {len(idx)} mid points, p50 {lat['p50']}ns")
+
+
 if __name__ == "__main__":
     for name, path in PROJECTS.items():
         if not path.exists():
@@ -308,3 +371,4 @@ if __name__ == "__main__":
     export_vrp()
     export_ird()
     export_vol_surface()
+    export_lob()

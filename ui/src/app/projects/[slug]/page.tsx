@@ -12,6 +12,7 @@ import { RiskDial } from "@/components/charts/risk-dial";
 import { VrpTrackingChart, VrpEquityChart, VrpPremiumChart } from "@/components/charts/vrp-charts";
 import { IrdCurveChart, IrdSpreadChart, IrdVolFitChart } from "@/components/charts/ird-charts";
 import { VolSurface3D, SmileFitChart, AtmTermChart } from "@/components/charts/vol-surface-charts";
+import { LobMidChart, LobLatencyChart, LobMsgRateChart } from "@/components/charts/lob-charts";
 import { GithubIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
@@ -89,6 +90,43 @@ function ProjectCharts({ slug }: { slug: string }) {
           <div className="border-t border-border pt-8">
             <ChartBlock title="2s10s slope across the dataset (the 2022–2024 inversion)">
               <IrdSpreadChart />
+            </ChartBlock>
+          </div>
+        </div>
+      );
+    case "lob-engine":
+      return (
+        <div className="flex flex-col gap-10">
+          <ChartBlock title="Live session replay — the engine's own dashboard, playing the real trading day">
+            <iframe
+              src="/replay/lob-replay.html"
+              title="AAPL limit order book session replay"
+              className="h-[720px] w-full rounded-xl border border-border bg-black"
+              loading="lazy"
+            />
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground">
+                Press play. Every top-of-book change and fill from AAPL on 2024-01-05, delta-encoded
+                and replayed at 0.5–15 market-minutes per second.
+              </p>
+              <a
+                href="/replay/lob-replay.html"
+                target="_blank"
+                rel="noreferrer"
+                className="shrink-0 text-xs font-medium text-primary hover:underline"
+              >
+                Open full screen ↗
+              </a>
+            </div>
+          </ChartBlock>
+          <div className="border-t border-border pt-8">
+            <ChartBlock title="Book-update latency distribution (C++ benchmark)">
+              <LobLatencyChart />
+            </ChartBlock>
+          </div>
+          <div className="border-t border-border pt-8">
+            <ChartBlock title="Message intensity through the session">
+              <LobMsgRateChart />
             </ChartBlock>
           </div>
         </div>
