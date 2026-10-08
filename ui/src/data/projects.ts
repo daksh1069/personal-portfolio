@@ -18,9 +18,11 @@ export type Project = {
   repoUrl?: string;
   /** True when the project's charts render real backtest/analysis output. */
   realData: boolean;
+  /** True to keep the project out of the site (no card, no detail page). */
+  hidden?: boolean;
 };
 
-export const projects: Project[] = [
+const allProjects: Project[] = [
   {
     slug: "convexity-protection",
     title: "Optimal Hedging of Leveraged ETF Positions (Convexity Protection)",
@@ -97,6 +99,7 @@ export const projects: Project[] = [
     chart: "ird",
     repoUrl: "https://github.com/daksh1069/interest-rate-derivatives-engine",
     realData: true,
+    hidden: true,
   },
   {
     slug: "lob-engine",
@@ -123,6 +126,7 @@ export const projects: Project[] = [
     demo: "/replay/lob-replay.html",
     repoUrl: "https://github.com/daksh1069/lob_and_data_parser",
     realData: true,
+    hidden: true,
   },
   {
     slug: "vol-model-calibration",
@@ -150,3 +154,5 @@ export const projects: Project[] = [
     realData: true,
   },
 ];
+
+export const projects = allProjects.filter((p) => !p.hidden);
